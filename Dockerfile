@@ -1,5 +1,4 @@
 FROM node:22.11.0 AS node
-FROM composer
 FROM php:8.0-apache AS base
 
 # Install system and PHP deps
@@ -21,7 +20,7 @@ COPY --from=node /usr/local/bin/node /usr/local/bin/node
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 
 # Install composer
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Clone Moodle and grant permissions
 RUN git clone -b MOODLE_402_STABLE --depth 1 \
