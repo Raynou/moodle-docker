@@ -14,13 +14,16 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js and Composer
-RUN apt-get update \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && npm install -g grunt-cli npx \
-    && curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl gnupg2 lsb-release ca-certificates && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends nodejs && \
+    npm install -g grunt-cli npx && \
+    curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer && \
+    rm -rf /var/lib/apt/lists/*
 
 # Clone Moodle and grant permissions
 RUN git clone -b MOODLE_402_STABLE --depth 1 \
