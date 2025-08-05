@@ -1,28 +1,25 @@
 FROM php:8.0-apache AS base
 
+# Install system and PHP deps
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     git libxml2-dev libpng-dev watchman libonig-dev \
     curl gnupg2 lsb-release ca-certificates \
-    # Install PHP extensions manager
     && curl -sL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
     -o /usr/local/bin/install-php-extensions \
     && chmod +x /usr/local/bin/install-php-extensions \
-    # PHP extensions
-    && install-php-extensions \
-    openssl xmlrpc json xmlreader pcre spl zip curl \
-    && docker-php-ext-install \
-    mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
-    && docker-php-ext-enable \
-    mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
-    # Setup Node.js
+    && install-php-extensions openssl xmlrpc json xmlreader pcre spl zip curl \
+    && docker-php-ext-install mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
+    && docker-php-ext-enable mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js and Composer
+RUN apt-get update \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && npm install -g grunt-cli npx \
-    # Setup Composer
     && curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer \
-    # Final pune
     && rm -rf /var/lib/apt/lists/*
 
 # Clone Moodle and grant permissions
