@@ -1,18 +1,22 @@
+# syntax = docker/dockerfile:1.4
+
 FROM node:22.11.0 AS node
 FROM php:8.0-apache AS base
 
 # Install system and PHP deps
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    git libxml2-dev libpng-dev watchman libonig-dev \
-    curl gnupg2 lsb-release ca-certificates \
-    && curl -sL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
-    -o /usr/local/bin/install-php-extensions \
-    && chmod +x /usr/local/bin/install-php-extensions \
-    && install-php-extensions openssl xmlrpc json xmlreader pcre spl zip curl \
-    && docker-php-ext-install mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
-    && docker-php-ext-enable mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
-    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/var/lib/apt/lists \
+    --mount=type=cache,target=/var/cache/apt \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    libxml2-dev libpng-dev watchman libonig-dev libicu-dev \
+    curl gnupg2 lsb-release ca-certificates unzip && \
+    # PHP intl sin compilar ICU desde cero
+    docker-php-ext-configure intl --with-icu-dir=/usr && \
+    docker-php-ext-install \
+    intl \
+    mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Node
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
