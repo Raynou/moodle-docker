@@ -1,21 +1,20 @@
-# syntax = docker/dockerfile:1.4
+# syntax=docker/dockerfile:1.4
 
 FROM node:22.11.0 AS node
 FROM php:8.0-apache AS base
 
 # Install system and PHP deps
-RUN --mount=type=cache,target=/var/lib/apt/lists \
-    --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,target=/var/lib/apt/lists,sharing=private \
+    --mount=type=cache,target=/var/cache/apt,sharing=private \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-    git \
-    libxml2-dev libpng-dev watchman libonig-dev libicu-dev \
-    curl gnupg2 lsb-release ca-certificates unzip && \
-    # PHP intl sin compilar ICU desde cero
+      git \
+      libxml2-dev libpng-dev watchman libonig-dev libicu-dev \
+      curl gnupg2 lsb-release ca-certificates unzip && \
     docker-php-ext-configure intl --with-icu-dir=/usr && \
     docker-php-ext-install \
-    intl \
-    mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml && \
+      intl \
+      mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Node
