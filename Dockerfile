@@ -1,3 +1,5 @@
+FROM node:22.11.0 AS node
+FROM composer
 FROM php:8.0-apache AS base
 
 # Install system and PHP deps
@@ -13,17 +15,13 @@ RUN apt-get update \
     && docker-php-ext-enable mysqli iconv mbstring tokenizer soap ctype simplexml gd dom xml intl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js and Composer
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl gnupg2 lsb-release ca-certificates && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends nodejs && \
-    npm install -g grunt-cli npx && \
-    curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
-    rm -rf /var/lib/apt/lists/*
+# Install Node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+
+# Install composer
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 # Clone Moodle and grant permissions
 RUN git clone -b MOODLE_402_STABLE --depth 1 \
