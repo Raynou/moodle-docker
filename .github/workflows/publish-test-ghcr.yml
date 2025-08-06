@@ -36,5 +36,5 @@ jobs:
       with:
         platforms: linux/amd64
         push: true
-        tags: ghcr.io/raynou/moodle-docker:latest
+        tags: ghcr.io/raynou/moodle-test:latest
     
